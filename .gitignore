@@ -1,2 +1,7 @@
 planning
 clean_content.md
+backup
+.env
+planning
+__pycache__
+openfoam_naca_*

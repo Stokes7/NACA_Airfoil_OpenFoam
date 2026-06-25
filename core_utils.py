@@ -1,23 +1,21 @@
-# %% ── 1. Import Libraries ──────────────────────────────────────────────
 import math
 import os
-import subprocess
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
-
-# set up directories
-os.makedirs("openfoam_naca/constant", exist_ok=True)
-os.makedirs("openfoam_naca/system", exist_ok=True)
-
-# write empty file for use with paraview
-with open("openfoam_naca/case.foam", "w") as f:
-    f.write("")
 
 
-# %% ── 2. Generate Airfoil ──────────────────────────────────────────────
+def setup_case_directories(case_name):
+    os.makedirs(f"{case_name}/constant", exist_ok=True)
+    os.makedirs(f"{case_name}/system", exist_ok=True)
+
+    # write empty file for use with paraview
+    with open(f"{case_name}/case.foam", "w") as f:
+        f.write("")
+
+    return
+
+
 def generate_naca4(digits, chord=1.0, points=100):
     """Generates 2D coordinates for a 4-digit NACA airfoil."""
     m = int(digits[0]) / 100.0  # Max camber
@@ -65,24 +63,8 @@ def generate_naca4(digits, chord=1.0, points=100):
     # Scale by chord length
     return np.column_stack((x_coords, y_coords)) * chord
 
-airfoil_code = "8412"
-chord_length = 1.0  # 1 meter long
-n_surface_points = 100
 
-discretized_surface_points = generate_naca4(airfoil_code, chord=chord_length, points=n_surface_points)
-
-ax = plt.subplots(1, 1, figsize=(10, 5))[1]
-
-ax.plot(discretized_surface_points[:, 0], discretized_surface_points[:, 1], 'o-', label=f'NACA {airfoil_code}')
-ax.set_aspect("equal")
-plt.show()
-
-print(discretized_surface_points.shape)
-
-
-
-# %% ── 3. Define mesh generator ──────────────────────────────────────────────
-def curiosityFluidsAirfoilMesher(airfoil_points, path_to_blockdict="openfoam_naca/system/blockMeshDict"):
+def curiosityFluidsAirfoilMesher(airfoil_points, path_to_blockdict):
     # airfoil_points: [n_points, 2] array
     # path_to_blockdict: path to the blockMeshDict file
 
@@ -637,14 +619,7 @@ def curiosityFluidsAirfoilMesher(airfoil_points, path_to_blockdict="openfoam_nac
 
     f.close()
 
-# %% ── 4. Generate Mesh ──────────────────────────────────────────────
-curiosityFluidsAirfoilMesher(discretized_surface_points)
 
-# %% ── 5. Set flow parameters ──────────────────────────────────────────────
-rho_freestream = 1.225
-u_freestream = 30
-
-# %% ── 5. Define control dict generator ──────────────────────────────────────────────
 def create_control_dict(case_dir, end_time=0.6, u_inf=30, rho_inf=1.225, z_length=1.0, write_interval=0.05):
     # end_time: for how long the simulation runs
     # u_inf: free-stream velocity
@@ -744,17 +719,11 @@ functions
         
     return dict_path
 
-create_control_dict("openfoam_naca", rho_inf=rho_freestream, u_inf=u_freestream)
-# run meshing
-
-
-# %% ── 6. Run mesh ──────────────────────────────────────────────
-
-OPENFOAM_IMAGE = "docker://microfluidica/openfoam:13"
-PROJECT_DIR = Path.cwd().resolve()
-case_dir = PROJECT_DIR  / "openfoam_naca"
-
 def foam_cmd(*args, workdir="/work"):
+    OPENFOAM_IMAGE = "docker://microfluidica/openfoam:13"
+    PROJECT_DIR = Path.cwd().resolve()
+    case_dir = PROJECT_DIR  / "openfoam_naca"
+
     return [
         "apptainer",
         "run",
@@ -766,11 +735,8 @@ def foam_cmd(*args, workdir="/work"):
         *args,
     ]
 
-subprocess.run(foam_cmd("blockMesh", "-case", "openfoam_naca"))
-# %% ── Check Mesh ──────────────────────────────────────────────
-subprocess.run(foam_cmd("checkMesh", "-case", "openfoam_naca"))
 
-# %% ── Create momentum equations ──────────────────────────────────────────────
+
 def create_momentum_transport_sa(case_dir):
     constant_dir = os.path.join(case_dir, "constant")
     os.makedirs(constant_dir, exist_ok=True)
@@ -810,8 +776,8 @@ RAS
         
     return dict_path
 
-create_momentum_transport_sa("openfoam_naca")
-# %% ── Create FV Scheme ──────────────────────────────────────────────
+
+
 def generate_openfoam_fvschemes_fvsolution(case_dir, steady_state=True):
     """
     Generates fvSchemes and fvSolution files tailored for OpenFOAM 13's
@@ -971,8 +937,9 @@ PIMPLE
     with open(os.path.join(system_dir, "fvSolution"), "w") as f:
         f.write(fv_solution)
 
-generate_openfoam_fvschemes_fvsolution("openfoam_naca")
-# %% ── Generate Physicall Properties ──────────────────────────────────────────────
+
+
+
 def generate_physical_properties(case_dir, nu_value=1.5e-5):
     """
     Generates a physicalProperties file for incompressible flow.
@@ -1006,9 +973,8 @@ nu              [0 2 -1 0 0 0 0] {nu_value};
     with open(file_path, "w") as f:
         f.write(file_content)
 
-generate_physical_properties("openfoam_naca", nu_value=1.5e-5)
 
-# %% ── Generate 0 dir  ──────────────────────────────────────────────
+
 def generate_0_directory(case_dir, u_freestream, rho_freestream, nu=1.5e-5):
     """
     Generates initial and boundary condition field files in the 0/ directory 
@@ -1229,71 +1195,3 @@ boundaryField
         file_path = os.path.join(zero_dir, field_name)
         with open(file_path, "w") as f:
             f.write(script_content)
-
-generate_0_directory("openfoam_naca", u_freestream, rho_freestream)
-# %% ── Run Foam CMD  ──────────────────────────────────────────────
-subprocess.run(foam_cmd("foamRun", "-case", "openfoam_naca"))
-
-# %% ── Read Coefficients  ──────────────────────────────────────────────
-forcecoeffs_file = "openfoam_naca/postProcessing/computeLiftDrag/0/forceCoeffs.dat"
-
-# Read the space-delimited file, ignoring the OpenFOAM header lines starting with '#'
-# Column 0 is Time, Column 1 is Cd, Column 3 is Cl
-df = pd.read_csv(forcecoeffs_file, sep=r'\s+', comment='#', header=None)
-
-# Extract columns
-time = df[0]
-cd = df[2]
-cl = df[3]
-
-plt.figure(figsize=(10, 5))
-plt.plot(time, cd, label="Drag Coefficient (Cd)", color="red", linewidth=2)
-plt.plot(time, cl, label="Lift Coefficient (Cl)", color="blue", linewidth=2)
-
-plt.title("Aerodynamic Force Coefficients Over Time")
-plt.xlabel("Time (s)")
-plt.ylabel("Coefficient Value")
-plt.grid(True, linestyle="--", alpha=0.7)
-plt.legend()
-
-plt.tight_layout()
-# plt.savefig("force_coefficients_plot.png")
-plt.show()
-
-# %% ── Read Coefficients  ──────────────────────────────────────────────
-
-residuals_file = "openfoam_naca/postProcessing/residuals/0/residuals.dat"
-
-# Read the data, ignoring headers and comments
-df = pd.read_csv(residuals_file, sep=r'\s+', comment='#', header=None)
-
-plt.figure(figsize=(10, 6))
-
-time = df[0]
-r_ux = df[1]
-r_uy = df[2]
-r_p = df[3]
-
-plt.plot(time, r_p, label='Pressure', color='black', alpha=0.8)
-plt.plot(time, r_ux, label='Velocity Ux', color='blue', alpha=0.8)
-plt.plot(time, r_uy, label='Velocity Uy', color='green', alpha=0.8)
-
-# Set the Y-axis to logarithmic to view convergence properly
-plt.yscale('log')
-
-plt.title("Solver Residuals Over Time")
-plt.xlabel("Time (s)")
-plt.ylabel("Residual (Log Scale)")
-plt.grid(True, which="both", linestyle="--", alpha=0.5)
-plt.legend()
-
-plt.tight_layout()
-# plt.savefig("residuals_plot.png")
-plt.show()
-
-
-
-# %% ──  ──────────────────────────────────────────────
-
-
-
