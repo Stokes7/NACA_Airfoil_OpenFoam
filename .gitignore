@@ -5,3 +5,8 @@ backup
 planning
 __pycache__
 openfoam_naca_*
+job.Convergence*
+openfoam_naca*
+spatial_convergence*
+SUB_SCRIPT*
+analysis.py

@@ -67,7 +67,7 @@ def generate_naca4(digits, chord=1.0, points=100):
 
 airfoil_code = "8412"
 chord_length = 1.0  # 1 meter long
-n_surface_points = 100
+n_surface_points = 50
 
 discretized_surface_points = generate_naca4(airfoil_code, chord=chord_length, points=n_surface_points)
 
