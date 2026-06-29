@@ -38,12 +38,10 @@ def run_meshing_failure():
     
     if result.returncode != 0:
         print("\nBlockMesh FAILED (as expected)! This proves the meshing algorithm breaks down.")
-        print("Here is a snippet of the error:")
         print("--------------------------------------------------")
         print("\n".join(result.stderr.splitlines()[-15:]))
         print("--------------------------------------------------")
     else:
-        print("\nBlockMesh succeeded without fatal crash, but the mesh is likely highly distorted, self-intersecting, or has negative volumes.")
         
         print("Running checkMesh to verify mesh quality...")
         check_result = subprocess.run(
@@ -52,11 +50,9 @@ def run_meshing_failure():
             text=True
         )
         if "Failed 1 or more mesh checks" in check_result.stdout or check_result.returncode != 0:
-             print("CheckMesh FAILED! The mesh has severe quality issues (e.g., negative volumes).")
+             print("CheckMesh FAILED!")
         else:
-             print("CheckMesh passed (unexpected for such low points!).")
-             
-        print(f"--> Open '{case_name}' in ParaView to visualize the defective geometry and include it in your report.")
+             print("CheckMesh passed")
 
 if __name__ == "__main__":
     run_meshing_failure()
