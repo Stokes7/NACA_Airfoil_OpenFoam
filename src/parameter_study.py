@@ -67,7 +67,8 @@ def extract_forces(case_name):
 # %% ── Main Parameter Study ───────────────────────────────────────────────────
 if __name__ == "__main__":
     chord_length = 1.0  # 1 meter long
-    n_surface_points = 600 # Fixed optimal value from convergence study
+    n_surface_points = 600 # Fixed optimal number of points from convergence study
+    end_time = 0.55 # Fixed optimal time value from convergence study
     
     cambers = list(range(0, 9))  # M values from 0 to 8
     naca_codes = [f"{m}412" for m in cambers]
@@ -90,3 +91,26 @@ if __name__ == "__main__":
         cd_results.append(cd_val)
         
         print(f"Result for NACA {code} -> Cl: {cl_val}, Cd: {cd_val}")
+
+    # Plot results
+    if cl_results and cd_results:
+        fig, ax1 = plt.subplots(figsize=(10, 5))
+        
+        color = 'tab:red'
+        ax1.set_xlabel('Maximum Camber (1st Digit of NACA 4-series)')
+        ax1.set_ylabel('Drag Coefficient (Cd)', color=color)
+        ax1.plot(cambers, cd_results, marker='o', color=color, label='Cd')
+        ax1.tick_params(axis='y', labelcolor=color)
+        ax1.grid(True, linestyle="--", alpha=0.7)
+        
+        ax2 = ax1.twinx()  
+        
+        color = 'tab:blue'
+        ax2.set_ylabel('Lift Coefficient (Cl)', color=color)
+        ax2.plot(cambers, cl_results, marker='s', color=color, label='Cl')
+        ax2.tick_params(axis='y', labelcolor=color)
+        
+        fig.tight_layout()
+        os.makedirs("figs", exist_ok=True)
+        plt.savefig("figs/camber_parameter_study.png")
+        print("Saved parameter study plot to figs/camber_parameter_study.png")
