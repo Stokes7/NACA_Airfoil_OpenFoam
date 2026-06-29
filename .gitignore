@@ -13,3 +13,4 @@ analysis.py
 parameter_study_camber/
 convergence_study_num_points/
 figs/*
+bonus_task_mesh_failure/
