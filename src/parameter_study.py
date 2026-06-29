@@ -1,7 +1,9 @@
+# %% ── Import Libraries  ──────────────────────────────────────────────
 import os
 import subprocess
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from core_utils import (
     create_control_dict,
@@ -114,3 +116,5 @@ if __name__ == "__main__":
         os.makedirs("figs", exist_ok=True)
         plt.savefig("figs/camber_parameter_study.png")
         print("Saved parameter study plot to figs/camber_parameter_study.png")
+
+# %% ──  ───────────────────────────────────────────────────
