@@ -1,11 +1,9 @@
 # %% ── 1. Import Libraries ──────────────────────────────────────────────
-import subprocess
 import os
-import shutil
+import subprocess
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 
 from core_utils import (
     create_control_dict,
@@ -79,13 +77,16 @@ case_name = "openfoam_naca"
 postprocess_columns = ["Time", "Cm", "Cd", "Cl", "Cl(f)", "Cl(r)"]
 
 
-n_points = list(range(20, 105, 5))
+n_points = list(range(200, 1050, 50))
 cl_results = []
 cd_results = []
 
 print("--- Starting Spatial Convergence Study ---")
 for point in n_points:
-    current_case = f"{case_name}_{point}"
+    print(f"Running for {point} points...")
+    base_dir = "convergence_study_num_points"
+    os.makedirs(base_dir, exist_ok=True)
+    current_case = f"{base_dir}/{case_name}_{point}"
     run_simulation(current_case, airfoil_code="8412", chord=1.0, points=point, end_time=0.6)
     cl_val, cd_val = extract_forces(current_case)
     
@@ -93,35 +94,4 @@ for point in n_points:
     cd_results.append(cd_val)
 
     print(f"Result for {point} points -> Cl: {cl_val}, Cd: {cd_val}")
-
-
-# %% ── Plotting and Saving Results  ──────────────────────────────────────────────
-
-plt.figure(figsize=(12, 5))
-
-plt.subplot(1, 2, 1)
-plt.plot(n_points, cl_results, 'bo-')
-plt.title('Lift Coefficient vs. Surface Points')
-plt.xlabel('Number of Points')
-plt.ylabel('Cl')
-plt.grid(True)
-
-plt.subplot(1, 2, 2)
-plt.plot(n_points, cd_results, 'ro-')
-plt.title('Drag Coefficient vs. Surface Points')
-plt.xlabel('Number of Points')
-plt.ylabel('Cd')
-plt.grid(True)
-
-plt.tight_layout()
-plt.savefig("spatial_convergence.png")
-print("Saved plot to spatial_convergence.png")
-
-#Save results in CSV
-df = pd.DataFrame({"Points": n_points, "Cl": cl_results, "Cd": cd_results})
-df.to_csv("spatial_convergence.csv", index=False)
-print("Saved results to spatial_convergence.csv")
-
-
-# %% ── ──────────────────────────────────────────────
 
