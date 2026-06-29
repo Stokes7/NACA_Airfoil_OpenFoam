@@ -67,7 +67,7 @@ def extract_forces(case_name):
 # %% ── Main Parameter Study ───────────────────────────────────────────────────
 if __name__ == "__main__":
     chord_length = 1.0  # 1 meter long
-    n_surface_points = 600 # Fixed optimal number of points from convergence study
+    n_surface_points = 2200 # Fixed optimal number of points from convergence study
     end_time = 0.55 # Fixed optimal time value from convergence study
     
     cambers = list(range(0, 9))  # M values from 0 to 8

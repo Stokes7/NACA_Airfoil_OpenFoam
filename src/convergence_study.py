@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from core_utils import (
+from src.core_utils import (
     create_control_dict,
     create_momentum_transport_sa,
     curiosityFluidsAirfoilMesher,
@@ -79,7 +79,7 @@ base_dir = "convergence_study_num_points"
 case_name = "openfoam_naca"
 postprocess_columns = ["Time", "Cm", "Cd", "Cl", "Cl(f)", "Cl(r)"]
 
-n_points = list(range(1000, 2050, 50))
+n_points = list(range(2050, 3050, 50))
 cl_results = []
 cd_results = []
 
@@ -188,11 +188,11 @@ if points and len(points) > 1:
     # plt.show()
 
 # %% ── Temporal Relative Error (Optimal Case)  ──────────────────────────────────────────────
-optimal_case = "convergence_study_num_points/openfoam_naca_600"
-force_file_600 = f"{optimal_case}/postProcessing/computeLiftDrag/0/forceCoeffs.dat"
+optimal_points = 2200
+force_file_optimal = f"convergence_study_num_points/openfoam_naca_{optimal_points}/postProcessing/computeLiftDrag/0/forceCoeffs.dat"
 
-if os.path.exists(force_file_600):
-    df_opt = pd.read_csv(force_file_600, sep=r'\s+', comment='#', header=None)
+if os.path.exists(force_file_optimal):
+    df_opt = pd.read_csv(force_file_optimal, sep=r'\s+', comment='#', header=None)
     if not df_opt.empty:
         t_opt = df_opt[0].values
         cd_opt = df_opt[2].values

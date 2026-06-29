@@ -12,3 +12,4 @@ SUB_SCRIPT*
 analysis.py
 parameter_study_camber/
 convergence_study_num_points/
+figs/*
