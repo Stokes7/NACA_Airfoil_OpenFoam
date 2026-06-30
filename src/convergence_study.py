@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from src.core_utils import (
+from core_utils import (
     create_control_dict,
     create_momentum_transport_sa,
     curiosityFluidsAirfoilMesher,
