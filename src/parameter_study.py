@@ -17,6 +17,7 @@ from core_utils import (
     setup_case_directories,
 )
 
+
 # %% ── Set up simulation method  ──────────────────────────────────────────────
 def run_simulation(case_name, airfoil_code="8412", chord=1.0, points=200, end_time=0.6):
 
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     n_surface_points = 2200 # Fixed optimal number of points from convergence study
     end_time = 0.55 # Fixed optimal time value from convergence study
     
-    cambers = list(range(0, 9))  # M values from 0 to 8
+    cambers = list(range(1, 9))  # M values from 0 to 8
     naca_codes = [f"{m}412" for m in cambers]
     
     cl_results = []
@@ -85,13 +86,13 @@ if __name__ == "__main__":
     for m, code in zip(cambers, naca_codes):
         print(f"Running for NACA {code}...")
         current_case = f"{base_dir}/naca_{code}"
-        
-        run_simulation(current_case, airfoil_code=code, chord=chord_length, points=n_surface_points, end_time=0.5)
+
+        # run_simulation(current_case, airfoil_code=code, chord=chord_length, points=n_surface_points, end_time=0.5)
         cl_val, cd_val = extract_forces(current_case)
-        
+
         cl_results.append(cl_val)
         cd_results.append(cd_val)
-        
+
         print(f"Result for NACA {code} -> Cl: {cl_val}, Cd: {cd_val}")
 
     # Plot results
@@ -118,3 +119,7 @@ if __name__ == "__main__":
         print("Saved parameter study plot to figs/camber_parameter_study.png")
 
 # %% ──  ───────────────────────────────────────────────────
+
+
+
+

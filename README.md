@@ -13,6 +13,38 @@ This repository contains a modular, automated software pipeline for simulating a
 
 ---
 
+## Installation and Environment Setup
+
+To ensure all scripts run correctly and do not conflict with your system Python packages, it is highly recommended to set up a virtual environment and install the required dependencies using the provided `requirements.txt`.
+
+1. **Clone the repository and navigate into it:**
+   ```bash
+   git clone https://github.com/Stokes7/NACA_Airfoil_OpenFoam.git
+   cd NACA_Airfoil_OpenFoam
+   ```
+
+2. **Create a Python virtual environment:**
+   ```bash
+   python3 -m venv .env
+   ```
+
+3. **Activate the virtual environment:**
+   - On Linux/macOS:
+     ```bash
+     source .env/bin/activate
+     ```
+   - On Windows:
+     ```bash
+     .env\Scripts\activate
+     ```
+
+4. **Install the dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+---
+
 ## 1. Convergence Study (`src/convergence_study.py`)
 
 This script evaluates how the mesh density (number of points defining the airfoil surface) affects the accuracy of the aerodynamic forces and the stability of the solver.

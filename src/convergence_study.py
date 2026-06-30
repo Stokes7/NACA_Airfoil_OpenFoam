@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from core_utils import (
+from src.core_utils import (
     create_control_dict,
     create_momentum_transport_sa,
     curiosityFluidsAirfoilMesher,
@@ -221,7 +221,7 @@ if os.path.exists(force_file_optimal):
         ax_time_err.legend()
         
         fig4.tight_layout()
-        plt.savefig("figs/temporal_relative_error_600.png")
+        plt.savefig(f"figs/temporal_relative_error_{optimal_points}.png")
         # plt.show()
 
 
